@@ -10,6 +10,7 @@ class GetterLongPollConnect(protocol.Protocol):
         port = port.split(':')
         port = port[2]
         reactor.connectTCP("localhost", int(port), LongPollConnectionFactory(get_request.get('key'), get_request.get('ts')))
+        self.transport.loseConnection()
 
 
 class GetterLongPollConnectFactory(protocol.ClientFactory):
@@ -23,7 +24,7 @@ class GetterLongPollConnectFactory(protocol.ClientFactory):
 
     def clientConnectionLost(self, connector, reason):
         print("Connection lost.")
-        reactor.stop()
+        # reactor.stop()
 
 
 class LongPollConnection(protocol.Protocol):
@@ -48,5 +49,7 @@ class LongPollConnectionFactory(protocol.ClientFactory):
         return LongPollConnection(self.__long_poll_get)
 
 
+reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
+reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
 reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
 reactor.run()
