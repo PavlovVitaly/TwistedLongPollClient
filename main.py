@@ -3,6 +3,13 @@ import pickle
 
 
 class GetterLongPollConnect(protocol.Protocol):
+
+    def connectionMade(self):
+        result_dict = dict()
+        result_dict['login'] = 'user'
+        result_dict['password'] = 'pass'
+        self.transport.write(pickle.dumps(result_dict))
+
     def dataReceived(self, data):
         get_request = pickle.loads(data)
         print("Server said:", get_request)
