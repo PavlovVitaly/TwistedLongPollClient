@@ -13,10 +13,11 @@ class GetterLongPollConnect(protocol.Protocol):
     def dataReceived(self, data):
         get_request = pickle.loads(data)
         print("Server said:", get_request)
-        port = get_request.get('server')
-        port = port.split(':')
-        port = port[2]
-        reactor.connectTCP("localhost", int(port), LongPollConnectionFactory(get_request.get('key'), get_request.get('ts')))
+        if get_request[0] == 'get':
+            port = get_request[1].get('server')
+            port = port.split(':')
+            port = port[2]
+            reactor.connectTCP("localhost", int(port), LongPollConnectionFactory(get_request[1].get('key'), get_request[1].get('ts')))
         self.transport.loseConnection()
 
 
