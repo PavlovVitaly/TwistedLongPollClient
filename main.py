@@ -27,11 +27,11 @@ class GetterLongPollConnectFactory(protocol.ClientFactory):
         return GetterLongPollConnect()
 
     def clientConnectionFailed(self, connector, reason):
-        print("Connection failed.")
+        print("GET: Connection failed.")
         reactor.stop()
 
     def clientConnectionLost(self, connector, reason):
-        print("Connection lost.")
+        print("GET: Connection lost.")
         # reactor.stop()
 
 
@@ -40,13 +40,25 @@ class LongPollConnection(protocol.Protocol):
         self.__long_poll_get = long_poll_get
 
     def connectionMade(self):
+        print('LONG POLL: Connection is made.')
         req = pickle.dumps(self.__long_poll_get)
         self.transport.write(req)
 
     def dataReceived(self, data):
         get_request = pickle.loads(data)
-        print("Server said:", get_request)
-        self.transport.loseConnection()
+        print("Server said:")
+        print('ts: ', get_request[1].get('ts'))
+        print('description: ', get_request[1].get('description'))
+        print('')
+
+    def clientConnectionFailed(self, connector, reason):
+        print("LONG POLL: Connection failed.")
+        reactor.stop()
+
+    def clientConnectionLost(self, connector, reason):
+        print("LONG POLL: Connection lost.")
+        # reactor.stop()
+
 
 
 class LongPollConnectionFactory(protocol.ClientFactory):
@@ -58,6 +70,6 @@ class LongPollConnectionFactory(protocol.ClientFactory):
 
 
 reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
-reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
-reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
+# reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
+# reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
 reactor.run()
