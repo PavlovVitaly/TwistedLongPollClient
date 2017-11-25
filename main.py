@@ -1,5 +1,6 @@
 from twisted.internet import reactor, protocol
 import pickle
+from Event import Event
 
 
 class GetterLongPollConnect(protocol.Protocol):
@@ -46,10 +47,18 @@ class LongPollConnection(protocol.Protocol):
 
     def dataReceived(self, data):
         get_request = pickle.loads(data)
-        print("Server said:")
-        print('ts: ', get_request[1].get('ts'))
-        print('description: ', get_request[1].get('description'))
-        print('')
+        if get_request[0] == 'event':
+            print("Server said:")
+            print('ts: ', get_request[1].timestamp)
+            print('description: ', get_request[1].description_of_event)
+            print('')
+        elif get_request[0] == 'cashed_events':
+            print("Server said:")
+            for event in get_request[1]:
+                print("Server said:")
+                print('ts: ', event.timestamp)
+                print('description: ', event.description_of_event)
+                print('')
 
     def clientConnectionFailed(self, connector, reason):
         print("LONG POLL: Connection failed.")
@@ -58,7 +67,6 @@ class LongPollConnection(protocol.Protocol):
     def clientConnectionLost(self, connector, reason):
         print("LONG POLL: Connection lost.")
         # reactor.stop()
-
 
 
 class LongPollConnectionFactory(protocol.ClientFactory):
