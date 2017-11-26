@@ -6,10 +6,20 @@ from Event import Event
 class GetterLongPollConnect(protocol.Protocol):
 
     def connectionMade(self):
+        # request = list()
+        # request.append('login')
+        # result_dict = dict()
+        # result_dict['login'] = 'Nachtmahr'  #'user'
+        # result_dict['password'] = 'germ'  #'pass'
+        # request.append(result_dict)
+        # self.transport.write(pickle.dumps(request))
+        request = list()
+        request.append('register')
         result_dict = dict()
-        result_dict['login'] = 'user'
-        result_dict['password'] = 'pass'
-        self.transport.write(pickle.dumps(result_dict))
+        result_dict['login'] = 'Nachtmahr'
+        result_dict['password'] = 'germ'
+        request.append(result_dict)
+        self.transport.write(pickle.dumps(request))
 
     def dataReceived(self, data):
         get_request = pickle.loads(data)
@@ -19,6 +29,8 @@ class GetterLongPollConnect(protocol.Protocol):
             port = port.split(':')
             port = port[2]
             reactor.connectTCP("localhost", int(port), LongPollConnectionFactory(get_request[1].get('key'), get_request[1].get('ts')))
+        elif get_request[0] == 'successful_registration':
+            print(get_request[0])
         self.transport.loseConnection()
 
 
