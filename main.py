@@ -4,21 +4,11 @@ from Event import Event
 
 
 class GetterLongPollConnect(protocol.Protocol):
+    def __init__(self):
+        self.menu_dict = {'1': self.client_login, '2': self.client_register, '3': self.exit}
 
     def connectionMade(self):
-        # request = list()
-        # request.append('login')
-        # result_dict = dict()
-        # result_dict['login'] = 'Nachtmahr'  #'user'
-        # result_dict['password'] = 'germ'  #'pass'
-        # request.append(result_dict)
-        # self.transport.write(pickle.dumps(request))
-        request = list()
-        request.append('register')
-        result_dict = dict()
-        result_dict['login'] = 'Nachtmahr'
-        result_dict['password'] = 'germ'
-        request.append(result_dict)
+        request = self.show_menu()
         self.transport.write(pickle.dumps(request))
 
     def dataReceived(self, data):
@@ -32,6 +22,39 @@ class GetterLongPollConnect(protocol.Protocol):
         elif get_request[0] == 'successful_registration':
             print(get_request[0])
         self.transport.loseConnection()
+
+    def client_login(self):
+        request = list()
+        request.append('login')
+        result_dict = dict()
+        result_dict['login'] = input("Введите Ваш login:")
+        result_dict['password'] = input("Ведите пароль:")
+        request.append(result_dict)
+        return request
+
+    def client_register(self):
+        request = list()
+        request.append('register')
+        result_dict = dict()
+        result_dict['login'] = input("Введите Ваш login:")
+        result_dict['password'] = input("Ведите пароль:")
+        request.append(result_dict)
+        return request
+
+    def exit(self):
+        self.connectionLost('')
+        reactor.stop()
+
+    def show_menu(self):
+        result = None
+        while not result:
+            choice = input("Выберите дальнейшее действие:\n1. Войти в систему.\n2. Зарегистрироваться\n3. Выйти\n")
+            show_point = self.menu_dict.get(choice)
+            if show_point is None:
+                print('Ошибка ввода! Повторите ввод.\n')
+                continue
+            result = show_point()
+        return result
 
 
 class GetterLongPollConnectFactory(protocol.ClientFactory):
@@ -90,6 +113,4 @@ class LongPollConnectionFactory(protocol.ClientFactory):
 
 
 reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
-# reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
-# reactor.connectTCP("localhost", 8000, GetterLongPollConnectFactory())
 reactor.run()
