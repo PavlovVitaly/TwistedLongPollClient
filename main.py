@@ -21,6 +21,8 @@ class GetterLongPollConnect(protocol.Protocol):
             reactor.connectTCP("localhost", int(port), LongPollConnectionFactory(get_request[1].get('key'), get_request[1].get('ts')))
         elif get_request[0] == 'successful_registration':
             print(get_request[0])
+        elif get_request[0] == 'failure_registration' or get_request[0] == 'error':
+            self.exit()
         self.transport.loseConnection()
 
     def client_login(self):
@@ -43,6 +45,7 @@ class GetterLongPollConnect(protocol.Protocol):
 
     def exit(self):
         self.connectionLost('')
+        self.transport.loseConnection()
         reactor.stop()
 
     def show_menu(self):
